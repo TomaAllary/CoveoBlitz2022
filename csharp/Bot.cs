@@ -130,18 +130,34 @@ namespace Blitz2022
 
         private Position DropD(Unit u, GameMessage gameMessage)
         {
-            if(gameMessage.map.doesTileExists(new Position(u.position.x, u.position.y + 1)))
+            if (gameMessage.map.doesTileExists(new Position(u.position.x, u.position.y + 1)))
+            {
                 if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + 1)) == TileType.EMPTY)
+                {
                     return new Position(u.position.x, u.position.y + 1);
+                }
+            }
             if (gameMessage.map.doesTileExists(new Position(u.position.x, u.position.y - 1)))
+            {
                 if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y - 1)) == TileType.EMPTY)
+                {
                     return new Position(u.position.x, u.position.y - 1);
+                }
+            }
             if (gameMessage.map.doesTileExists(new Position(u.position.x + 1, u.position.y)))
+            {
                 if (gameMessage.map.getTileTypeAt(new Position(u.position.x + 1, u.position.y)) == TileType.EMPTY)
+                {
                     return new Position(u.position.x + 1, u.position.y);
+                }
+            }
             if (gameMessage.map.doesTileExists(new Position(u.position.x - 1, u.position.y)))
+            {
                 if (gameMessage.map.getTileTypeAt(new Position(u.position.x + 1, u.position.y)) == TileType.EMPTY)
+                {
                     return new Position(u.position.x - 1, u.position.y);
+                }
+            }
 
             return null;
         }
