@@ -54,6 +54,17 @@ namespace Blitz2022
             return this.tiles[0].Length;
         }
 
+        public Diamond getDiamondById(string id)
+        {
+            foreach(Diamond diamond in this.diamonds)
+            {
+                if(diamond.id == id)
+                    return diamond;
+            }
+
+            return null;
+        }
+
         public TileType getTileTypeAt(Position position)
         {
             string rawTile = this.getRawTileValueAt(position);
@@ -83,6 +94,15 @@ namespace Blitz2022
             {
                 throw new PointOutOfMapException(position, this.horizontalSize(), this.verticalSize());
             }
+        }
+
+        public bool doesTileExists(Position position)
+        {
+            if (position.x < 0 || position.y < 0 || position.x >= this.horizontalSize() || position.y >= this.verticalSize())
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

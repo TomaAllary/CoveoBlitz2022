@@ -38,21 +38,47 @@ namespace Blitz2022
                     {
                         if (u.hasDiamond)
                         {
-                            if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + 1)) == TileType.EMPTY)
-                                actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x, u.position.y + 1)));
-                            else if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y - 1)) == TileType.EMPTY)
-                                actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x, u.position.y - 1)));
-                            else if (gameMessage.map.getTileTypeAt(new Position(u.position.x + 1, u.position.y)) == TileType.EMPTY)
-                                actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x + 1, u.position.y)));
-                            else
-                                actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x - 1, u.position.y)));
+                            Position dropPos = DropD(u, gameMessage);
+                            if(dropPos != null)
+                                actions.Add(new Action(UnitActionType.DROP, u.id, dropPos));
                         }
                     }
                     else
                     {
                         if (u.hasDiamond)
                         {
-                            actions.Add(new Action(UnitActionType.MOVE, u.id, getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize())));
+                            //seuil todo: a changer
+                            Position dropPos = DropD(u, gameMessage);
+                            if (gameMessage.map.getDiamondById(u.diamondId).points > 67 && dropPos != null)
+                            {
+                                actions.Add(new Action(UnitActionType.DROP, u.id, dropPos));
+                            }
+                            else
+                            {
+                                int closestDistance = closestEnnemyDistance(gameMessage, u.position);
+                                if (gameMessage.map.getDiamondById(u.diamondId).summonLevel < 5 && closestDistance - 1 > gameMessage.map.getDiamondById(u.diamondId).summonLevel)
+                                {
+                                    actions.Add(new Action(UnitActionType.SUMMON, u.id));
+                                }
+                                else
+                                {
+                                    Position ennemy = closestEnnemies(gameMessage, u.position).First().position;
+                                    int xDist = Math.Abs(ennemy.x - u.position.x);
+                                    int yDist = Math.Abs(ennemy.y - u.position.y);
+                                    int forward = 1;
+                                    if (xDist < yDist)
+                                    {
+                                        forward = (ennemy.x - u.position.x) / xDist;
+                                        actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x + forward, u.position.y)));
+                                    }
+                                    else
+                                    {
+                                        forward = (ennemy.y - u.position.y) / yDist;
+                                        actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x, u.position.y + forward)));
+                                    }
+
+                                }
+                            }
                         }
                         else
                         {
@@ -85,6 +111,24 @@ namespace Blitz2022
                 Console.WriteLine(e);
                 return new GameCommand(new List<Action>());
             }
+        }
+
+
+        private Position DropD(Unit u, GameMessage gameMessage)
+        {
+            if(gameMessage.map.doesTileExists(new Position(u.position.x, u.position.y + 1)))
+                if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + 1)) == TileType.EMPTY)
+                    return new Position(u.position.x, u.position.y + 1);
+            else if (gameMessage.map.doesTileExists(new Position(u.position.x, u.position.y - 1)))
+                if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y - 1)) == TileType.EMPTY)
+                    return new Position(u.position.x, u.position.y - 1);
+            else if (gameMessage.map.doesTileExists(new Position(u.position.x + 1, u.position.y)))
+                if (gameMessage.map.getTileTypeAt(new Position(u.position.x + 1, u.position.y)) == TileType.EMPTY)
+                    return new Position(u.position.x + 1, u.position.y);
+            else if (gameMessage.map.doesTileExists(new Position(u.position.x - 1, u.position.y)))
+                return new Position(u.position.x - 1, u.position.y);
+
+            return null;
         }
 
         private Unit canVineSomeone(Unit u, GameMessage gameMessage)
