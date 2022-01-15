@@ -31,19 +31,42 @@ namespace Blitz2022
             actions.AddRange(deadUnits.Select(unit => new Action(UnitActionType.SPAWN, unit.id, findRandomSpawn(gameMessage.map))).ToList<Action>());
                 foreach(Unit u in aliveUnits)
                 {
-                    if(gameMessage.tick == gameMessage.totalTick - 2)
+                if (gameMessage.tick == gameMessage.totalTick - 2)
+                {
+                    if (u.hasDiamond)
                     {
-                        if (u.hasDiamond)
-                        {
-                            actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x, u.position.y + 1)));
-                        }
+                        actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x, u.position.y + 1)));
+                    }
+                }
+                else
+                {
+                    if (u.hasDiamond)
+                    {
+                        //actions.AddRange(aliveUnits.Select(unit => new Action(UnitActionType.MOVE, unit.id, getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize()))).ToList<Action>());
+                        actions.Add(new Action(UnitActionType.MOVE, u.id, getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize())));
                     }
                     else
-                    //actions.AddRange(aliveUnits.Select(unit => new Action(UnitActionType.MOVE, unit.id, getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize()))).ToList<Action>());
-                    actions.Add(new Action(UnitActionType.MOVE, u.id, getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize())));
+                        actions.Add(new Action(UnitActionType.MOVE, u.id, findNearestDiamonds(gameMessage.map, u)));
+                }
             }
 
             return new GameCommand(actions);
+        }
+
+        private Position findNearestDiamonds(Map map, Unit unit) 
+        {
+            Diamond nearest = map.diamonds.first();
+            foreach(Diamond diamonds in map.diamonds)
+            {
+                if (distance(diamonds.position, unit.position) < distance(nearest.position, unit.position))
+                    nearest = diamonds;
+            }
+            return nearest.position;
+        }
+
+        private int distance(Position diamond, Position unit)
+        {
+            return Math.Abs((diamond.x - unit.x)) + Math.Abs((diamond.y - unit.y));
         }
 
         private Position findRandomSpawn(Map map)
