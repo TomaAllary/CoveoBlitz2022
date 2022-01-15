@@ -22,7 +22,7 @@ namespace Blitz2022
         public string diamondId;
         public bool hasSpawned;
         public bool isSummoning;
-        UnitState lastState;
+        public UnitState lastState;
     }
 
     public class UnitState

@@ -9,6 +9,7 @@ namespace Blitz2022
     public class Bot
     {
         public static string NAME = "MyBot C♭";
+        private MG_GameMessage mG_GameMessage;
 
         public Bot()
         {
@@ -22,6 +23,16 @@ namespace Blitz2022
         public GameCommand nextMove(GameMessage gameMessage)
         {
             try {
+                if(mG_GameMessage == null)
+                {
+                    mG_GameMessage = new MG_GameMessage(gameMessage);
+                }
+                else
+                {
+                    mG_GameMessage.UpdateValues(gameMessage);
+                }
+
+
                 Team myTeam = gameMessage.getTeamsMapById[gameMessage.teamId];
 
                 var unitsByLifeStatus = myTeam.units.GroupBy(unit => unit.hasSpawned).ToDictionary(group => group.Key, group => group.ToList());

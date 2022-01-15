@@ -7,6 +7,12 @@ namespace Blitz2022
         public string[][] tiles;
         public Diamond[] diamonds;
 
+        public void UpdateValues(Map map)
+        {
+            this.tiles = map.tiles;
+            this.diamonds = map.diamonds;
+        }
+
         public class Diamond
         {
             public Position position;
