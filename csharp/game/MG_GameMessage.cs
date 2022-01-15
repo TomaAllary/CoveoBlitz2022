@@ -27,6 +27,8 @@ namespace Blitz2022
 
         public Dictionary<int, string[]> teamPlayOrderings;
 
+        public Position[] considerWall;
+
 
         //only use to instantiate (override values)
         public MG_GameMessage(GameMessage original)
@@ -88,6 +90,20 @@ namespace Blitz2022
         public Dictionary<string, MG_Team> getTeamsMapById
         {
             get { return this.teams.ToDictionary(team => team.id, team => team); }
+        }
+
+        public bool isConsideredWall(Position p)
+        {
+            if(considerWall == null)
+                return false;
+
+            for(int i =0; i < considerWall.Length; i++)
+            {
+                if (considerWall[i].x == p.x && considerWall[i].y == p.y)
+                    return true;
+            }
+
+            return false;
         }
     }
 }

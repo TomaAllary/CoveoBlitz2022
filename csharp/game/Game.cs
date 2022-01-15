@@ -20,6 +20,13 @@ namespace Blitz2022
             public int summonLevel;
             public int points;
             public string ownerId;
+            public bool isAcessible;
+
+            public Diamond()
+            {
+                isAcessible = true;
+            }
+
 
             public string allyTargetingId;
         }
@@ -68,6 +75,17 @@ namespace Blitz2022
             {
                 if(diamond.id == id)
                     return diamond;
+            }
+
+            return null;
+        }
+
+        public Diamond getDiamondByPos(Position pos)
+        {
+            foreach(Diamond d in this.diamonds)
+            {
+                if (d.position.x == pos.x && d.position.y == pos.y)
+                    return d;
             }
 
             return null;

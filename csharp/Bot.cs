@@ -26,6 +26,95 @@ namespace Blitz2022
                 if(mG_GameMessage == null)
                 {
                     mG_GameMessage = new MG_GameMessage(gameMessage);
+
+                    int mapNb = 8;
+                    //find map
+                    //map #1
+                    if(gameMessage.map.getTileTypeAt(new Position(0, 6)) == TileType.WALL
+                        && gameMessage.map.getTileTypeAt(new Position(1, 6)) == TileType.WALL
+                        && gameMessage.map.getTileTypeAt(new Position(2, 6)) == TileType.WALL
+                        && gameMessage.map.getTileTypeAt(new Position(3, 6)) == TileType.WALL
+                        && gameMessage.map.getTileTypeAt(new Position(0, 7)) == TileType.WALL
+                        && gameMessage.map.getTileTypeAt(new Position(3,7)) == TileType.WALL
+                        && gameMessage.map.getTileTypeAt(new Position(0, 8)) == TileType.WALL
+                        && gameMessage.map.getTileTypeAt(new Position(1, 8)) == TileType.WALL
+                        && gameMessage.map.getTileTypeAt(new Position(2, 8)) == TileType.WALL
+                        && gameMessage.map.getTileTypeAt(new Position(3, 8)) == TileType.WALL
+                        && gameMessage.map.getTileTypeAt(new Position(1,7)) == TileType.SPAWN
+                        && gameMessage.map.getTileTypeAt(new Position(2,7)) == TileType.SPAWN)
+                    {
+                        mapNb = 1;
+
+                        mG_GameMessage.considerWall = new Position[3];
+                        mG_GameMessage.considerWall[0] = new Position(8,0);
+                        mG_GameMessage.considerWall[1] = new Position(1,7);
+                        mG_GameMessage.considerWall[2] = new Position(2,7);
+
+                        mG_GameMessage.considerWall[3] = new Position(15,13);
+                        mG_GameMessage.considerWall[4] = new Position(16,13);
+                        mG_GameMessage.considerWall[5] = new Position(17,13);
+                        mG_GameMessage.considerWall[6] = new Position(18,13);
+                        mG_GameMessage.considerWall[7] = new Position(19,13);
+
+                        /*Diamond d = mG_GameMessage.map.getDiamondByPos(new Position(8,0));
+                        if (d != null)
+                            d.isAcessible = false;*/
+                    }
+
+
+                    //map #2
+                    int count = 4;
+                    foreach(Diamond d in gameMessage.map.diamonds)
+                    {
+                        if( (d.position.x == 2 && d.position.y == 5) 
+                            || (d.position.x == 2 && d.position.y == 9)
+                            || (d.position.x == 2 && d.position.y == 12)
+                            || (d.position.x == 11 && d.position.y == 9)){
+                            count--;
+                        }
+                    }
+                    if (count == 0)
+                    {
+                        mapNb = 2;
+                        mG_GameMessage.considerWall = new Position[1];
+                        mG_GameMessage.considerWall[0] = new Position(11, 9);
+
+                        /*Diamond d = mG_GameMessage.map.getDiamondByPos(new Position(11,9));
+                        if (d != null)
+                            d.isAcessible = false;*/
+                    }
+
+                    //map #3
+                    count = 2;
+                    foreach (Diamond d in gameMessage.map.diamonds)
+                    {
+                        if ((d.position.x == 2 && d.position.y == 2)
+                            || (d.position.x == 9 && d.position.y == 8)){
+                            count--;
+                        }
+                    }
+                    if (count == 0 && gameMessage.map.diamonds.Length == 2)
+                    {
+                        mapNb = 3;
+                        mG_GameMessage.considerWall = new Position[1];
+                        mG_GameMessage.considerWall[0] = new Position(2,2);
+
+                        /*Diamond d = mG_GameMessage.map.getDiamondByPos(new Position(2,2));
+                        if (d != null)
+                            d.isAcessible = false;*/
+
+                    }
+
+                    //map #4
+
+
+                    //map #5
+
+
+                    //map#6
+
+
+                    //map #7
                 }
                 else
                 {
@@ -235,7 +324,7 @@ namespace Blitz2022
         // Receives a list of units and return the one whose team has the best score (if more than one has the same score, will return the first on these)
         private Unit pickBestScore(List<Unit> units, GameMessage gm)
         {
-            int teamScore = 0;
+            int teamScore = -1;
             Unit winner = null;
 
             foreach (Unit u in units)
@@ -556,19 +645,9 @@ namespace Blitz2022
             float bestActualValue = 0;
             foreach (Diamond d in mG_GameMessage.map.diamonds)
             {
-                if (d.ownerId == null)
-                {
-                    float dValue = ValueOfDiamond(d, unit);
-                    if (d.allyTargetingId == null && bestActualValue < dValue)
-                    {
-                        bestDiamond = d;
-                        bestActualValue = dValue;
-                    }
-                }
-                else
-                {
-                    MG_Team t = mG_GameMessage.getTeamByUnitId(d.ownerId);
-                    if (t != null && mG_GameMessage.teamId != t.id)
+               // if (d.isAcessible)
+                //{
+                    if (d.ownerId == null)
                     {
                         float dValue = ValueOfDiamond(d, unit);
                         if (d.allyTargetingId == null && bestActualValue < dValue)
@@ -577,7 +656,20 @@ namespace Blitz2022
                             bestActualValue = dValue;
                         }
                     }
-                }
+                    else
+                    {
+                        MG_Team t = mG_GameMessage.getTeamByUnitId(d.ownerId);
+                        if (t != null && mG_GameMessage.teamId != t.id)
+                        {
+                            float dValue = ValueOfDiamond(d, unit);
+                            if (d.allyTargetingId == null && bestActualValue < dValue)
+                            {
+                                bestDiamond = d;
+                                bestActualValue = dValue;
+                            }
+                        }
+                    }
+                //}
 
             }
 
@@ -647,7 +739,8 @@ namespace Blitz2022
                     //if (map.getTileTypeAt(position) == TileType.SPAWN && checkAroundForEMPTY(map, position))
                     if (gameMessage.map.getTileTypeAt(position) == TileType.SPAWN)
                     {
-                        spawns.Add(position);
+                        if(!mG_GameMessage.isConsideredWall(position))
+                            spawns.Add(position);
                     }
                     y++;
                 }
