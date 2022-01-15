@@ -140,24 +140,28 @@ namespace Blitz2022
                 {
                     foreach (Unit ennemy in team.units)
                     {
-                        //for each ennemy
-                        if (ennemy.position.x == u.position.x || ennemy.position.y == u.position.y)
+                        if (ennemy.hasSpawned)
                         {
-                            if (ennemy.hasDiamond)
+                            if (ennemy.position.x == u.position.x || ennemy.position.y == u.position.y)
                             {
-                                //check if vines can go
-                                TileType[] obstacles = getTilesBetweenPos(gameMessage.map, u.position, ennemy.position);
-                                Boolean canVine = true;
-                                foreach (TileType tile in obstacles)
+                                if (ennemy.hasDiamond)
                                 {
-                                    if (tile == TileType.SPAWN || tile == TileType.WALL) { canVine = false; break; }
-                                }
-                                if (canVine)
-                                {
-                                    return ennemy;
+                                    //check if vines can go
+                                    TileType[] obstacles = getTilesBetweenPos(gameMessage.map, u.position, ennemy.position);
+                                    Boolean canVine = true;
+                                    foreach (TileType tile in obstacles)
+                                    {
+                                        if (tile == TileType.SPAWN || tile == TileType.WALL) { canVine = false; break; }
+                                    }
+                                    if (canVine)
+                                    {
+                                        return ennemy;
+                                    }
                                 }
                             }
                         }
+                        //for each ennemy
+                       
                     }
                 }
             }
@@ -286,9 +290,13 @@ namespace Blitz2022
                 {
                     foreach (Unit u in t.units)
                     {
-                        int current = getAbsoluteDistance(u.position, position);
-                        if (current < closest)
-                            closest = current;
+                        if (u.hasSpawned)
+                        {
+                            int current = getAbsoluteDistance(u.position, position);
+                            if (current < closest)
+                                closest = current;
+                        }
+
                     }
                 }
             }
@@ -306,16 +314,19 @@ namespace Blitz2022
                 {
                     foreach (Unit u in t.units)
                     {
-                        int current = getAbsoluteDistance(u.position, position);
-                        if (current == closest)
+                        if (u.hasSpawned)
                         {
-                            units.Add(u);
-                        }
-                        else if (current < closest)
-                        {
-                            closest = current;
-                            units.Clear();
-                            units.Add(u);
+                            int current = getAbsoluteDistance(u.position, position);
+                            if (current == closest)
+                            {
+                                units.Add(u);
+                            }
+                            else if (current < closest)
+                            {
+                                closest = current;
+                                units.Clear();
+                                units.Add(u);
+                            }
                         }
 
                     }
