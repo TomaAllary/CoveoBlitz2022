@@ -152,7 +152,11 @@ namespace Blitz2022
                                 //vine an ennemy with diamond if possible
                                 Unit toVine = canVineSomeone(u, gameMessage);
                                 if (toVine != null && gameMessage.map.getTileTypeAt(u.position) != TileType.SPAWN)
-                                    actions.Add(new Action(UnitActionType.VINE, u.id, toVine.position));
+                                {
+                                    if (toVine.hasDiamond || doWePlayBeforeThem(toVine.teamId, gameMessage, 1))
+                                        actions.Add(new Action(UnitActionType.VINE, u.id, toVine.position));
+                                }
+
                                 else
                                 {
                                     //Spot and gove nearest diamond
@@ -380,6 +384,17 @@ namespace Blitz2022
                 return true;
             }
                 return false;
+        }
+        private bool doWePlayBeforeThem(string otherTeam, GameMessage gm, int inTurns)
+        {
+            int test = gm.tick + inTurns;
+            Dictionary<int, string[]> dico = gm.teamPlayOrderings;
+            string[] teamOrders = dico[gm.tick];
+            if (Array.IndexOf(teamOrders, gm.teamId) < Array.IndexOf(teamOrders, otherTeam))
+            {
+                return true;
+            }
+            return false;
         }
 
         //Returns an int with the distance between player and closest ennemies
