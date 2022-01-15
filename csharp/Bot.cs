@@ -49,7 +49,7 @@ namespace Blitz2022
                         {
                             //seuil todo: a changer
                             Position dropPos = DropD(u, gameMessage);
-                            if (gameMessage.map.getDiamondById(u.diamondId).points > 67 && dropPos != null && closestEnnemyDistance(gameMessage, u.position) > 1)
+                            if (gameMessage.map.getDiamondById(u.diamondId).points > 30 && dropPos != null && closestEnnemyDistance(gameMessage, u.position) > 1)
                             {
                                 actions.Add(new Action(UnitActionType.DROP, u.id, dropPos));
                             }
@@ -133,14 +133,15 @@ namespace Blitz2022
             if(gameMessage.map.doesTileExists(new Position(u.position.x, u.position.y + 1)))
                 if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + 1)) == TileType.EMPTY)
                     return new Position(u.position.x, u.position.y + 1);
-            else if (gameMessage.map.doesTileExists(new Position(u.position.x, u.position.y - 1)))
+            if (gameMessage.map.doesTileExists(new Position(u.position.x, u.position.y - 1)))
                 if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y - 1)) == TileType.EMPTY)
                     return new Position(u.position.x, u.position.y - 1);
-            else if (gameMessage.map.doesTileExists(new Position(u.position.x + 1, u.position.y)))
+            if (gameMessage.map.doesTileExists(new Position(u.position.x + 1, u.position.y)))
                 if (gameMessage.map.getTileTypeAt(new Position(u.position.x + 1, u.position.y)) == TileType.EMPTY)
                     return new Position(u.position.x + 1, u.position.y);
-            else if (gameMessage.map.doesTileExists(new Position(u.position.x - 1, u.position.y)))
-                return new Position(u.position.x - 1, u.position.y);
+            if (gameMessage.map.doesTileExists(new Position(u.position.x - 1, u.position.y)))
+                if (gameMessage.map.getTileTypeAt(new Position(u.position.x + 1, u.position.y)) == TileType.EMPTY)
+                    return new Position(u.position.x - 1, u.position.y);
 
             return null;
         }
