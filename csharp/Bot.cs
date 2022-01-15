@@ -57,6 +57,11 @@ namespace Blitz2022
                         else
                         {
                             //kill if ennemy aside..
+                            if (closestEnnemyDistance(gameMessage, u.position) == 1)
+                            {
+                                List<Unit> attackableUnits = closestEnnemies(gameMessage, u.position);
+                                
+                            }
 
                             //vine an ennemy with diamond if possible
                             Unit toVine = canVineSomeone(u, gameMessage);
@@ -78,7 +83,7 @@ namespace Blitz2022
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return null;
+                return new GameCommand(new List<Action>());
             }
         }
 
@@ -217,6 +222,70 @@ namespace Blitz2022
         {
             Random rand = new Random();
             return new Position(rand.Next(horizontalSize), rand.Next(verticalSize));
+        }
+
+       /* private bool doWePlayBeforeThem (string otherTeam, GameMessage gm)
+        {
+            if (gm.teamPlayOrderings.getByValueKey(gm.teamId) < gm.teamPlayOrderings.getByValueKey(otherTeam))
+                return true;
+            else
+                return false;
+        }*/
+
+        //Returns an int with the distance between player and closest ennemies
+        private int closestEnnemyDistance(GameMessage gm, Position position)
+        {
+            int closest = 10000;
+            foreach (Team t in gm.teams)
+            {
+                if (t.id != gm.teamId)
+                {
+                    foreach (Unit u in t.units)
+                    {
+                        int current = getAbsoluteDistance(u.position, position);
+                        if (current < closest)
+                            closest = current;
+                    }
+                }
+            }
+            return closest;
+        }
+
+        //Returns a table with all the closest ennemy units 
+        private List<Unit> closestEnnemies(GameMessage gm, Position position)
+        {
+            int closest = 10000;
+            List<Unit> units = new List<Unit>();
+            foreach (Team t in gm.teams)
+            {
+                if (t.id != gm.teamId)
+                {
+                    foreach (Unit u in t.units)
+                    {
+                        int current = getAbsoluteDistance(u.position, position);
+                        if (current == closest)
+                        {
+                            units.Add(u);
+                        }
+                        else if (current < closest)
+                        {
+                            closest = current;
+                            units.Clear();
+                            units.Add(u);
+                        }
+
+                    }
+                }
+            }
+            return units;
+        }
+
+        private int getAbsoluteDistance(Position badGuyPos, Position goodGuyPos)
+        {
+            int x, y;
+            x = Math.Abs(badGuyPos.x - goodGuyPos.x);
+            y = Math.Abs(badGuyPos.y - goodGuyPos.y);
+            return x + y;
         }
     }
 }
