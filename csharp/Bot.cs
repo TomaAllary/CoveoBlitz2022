@@ -62,7 +62,8 @@ namespace Blitz2022
                             Position dropPos = DropD(u, gameMessage);
                             if (gameMessage.map.getDiamondById(u.diamondId).points > 30 && dropPos != null && closestEnnemyDistance(gameMessage, u.position) > 1)
                             {
-                                actions.Add(new Action(UnitActionType.DROP, u.id, dropPos));
+                                if (closestEnnemyDistance(gameMessage, u.position) < 4 || isVinable(gameMessage, u.position, 'x') || isVinable(gameMessage, u.position, 'y'))
+                                    actions.Add(new Action(UnitActionType.DROP, u.id, dropPos));
                             }
                             else
                             {
@@ -235,10 +236,13 @@ namespace Blitz2022
 
             foreach (Unit u in units)
             {
-                if (gm.getTeamsMapById[u.teamId].score > teamScore)
+                if (u.hasSpawned)
                 {
-                    teamScore = gm.getTeamsMapById[u.teamId].score;
-                    winner = u;
+                    if (gm.getTeamsMapById[u.teamId].score > teamScore)
+                    {
+                        teamScore = gm.getTeamsMapById[u.teamId].score;
+                        winner = u;
+                    }
                 }
             }
             return winner;
@@ -681,8 +685,23 @@ namespace Blitz2022
                     {
                         foreach (Unit u in t.units)
                         {
-                            if (u.position.x == unitPosition.x)
-                                return true;
+                            if (u.hasSpawned && !(u.position.x == unitPosition.x && u.position.y == unitPosition.y))
+                            {
+                                if (u.position.x == unitPosition.x)
+                                {
+                                    bool wallBetween = false;
+                                    foreach (TileType tile in getTilesBetweenPos(gm.map, u.position, unitPosition))
+                                    {
+                                        if (tile != TileType.EMPTY)
+                                        {
+                                            wallBetween = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!wallBetween)
+                                        return true;
+                                }
+                            }
                         }
                     }
                     return false;
@@ -691,8 +710,23 @@ namespace Blitz2022
                     {
                         foreach (Unit u in t.units)
                         {
-                            if (u.position.x == unitPosition.y)
-                                return true;
+                            if (u.hasSpawned && !(u.position.x == unitPosition.x && u.position.y == unitPosition.y))
+                            {
+                                if (u.position.y == unitPosition.y)
+                                {
+                                    bool wallBetween = false;
+                                    foreach (TileType tile in getTilesBetweenPos(gm.map, u.position, unitPosition))
+                                    {
+                                        if (tile != TileType.EMPTY)
+                                        {
+                                            wallBetween = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!wallBetween)
+                                        return true;
+                                }
+                            }
                         }
                     }
                     return false;
