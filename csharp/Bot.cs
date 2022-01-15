@@ -40,7 +40,7 @@ namespace Blitz2022
                 List<Unit> aliveUnits = unitsByLifeStatus.ContainsKey(true) ? unitsByLifeStatus[true] : new List<Unit>();
 
                 List<Action> actions = new List<Action>();
-                actions.AddRange(deadUnits.Select(unit => new Action(UnitActionType.SPAWN, unit.id, findRandomSpawn(gameMessage))).ToList<Action>());
+                actions.AddRange(deadUnits.Select(unit => new Action(UnitActionType.SPAWN, unit.id, findRandomSpawn(gameMessage, unit))).ToList<Action>());
 
 
                 foreach (Unit u in aliveUnits)
@@ -202,7 +202,7 @@ namespace Blitz2022
                                 else
                                 {
                                     //Spot and move nearest diamond
-                                    Diamond best = findBestNotTargetedDiamond(u);
+                                    Diamond best = findBestNotTargetedDiamond(u.position);
                                     Position target = nearestWalkablePos(best.position);
 
                                     mG_GameMessage.map.getDiamondById(best.id).allyTargetingId = u.id;
@@ -411,15 +411,16 @@ namespace Blitz2022
             return nearest;
         }
 
-        private Diamond findBestNotTargetedDiamond(Unit u)
+      
+        private Diamond findBestNotTargetedDiamond(Position unit)
         {
             Diamond bestDiamond = mG_GameMessage.map.diamonds[0];
             float bestActualValue = 0;
-            foreach(Diamond d in mG_GameMessage.map.diamonds)
+            foreach (Diamond d in mG_GameMessage.map.diamonds)
             {
-                if(d.ownerId == null)
+                if (d.ownerId == null)
                 {
-                    float dValue = ValueOfDiamond(d, u);
+                    float dValue = ValueOfDiamond(d, unit);
                     if (d.allyTargetingId == null && bestActualValue < dValue)
                     {
                         bestDiamond = d;
@@ -429,9 +430,9 @@ namespace Blitz2022
                 else
                 {
                     MG_Team t = mG_GameMessage.getTeamByUnitId(d.ownerId);
-                    if (t != null && u.teamId != t.id)
+                    if (t != null && mG_GameMessage.teamId != t.id)
                     {
-                        float dValue = ValueOfDiamond(d, u);
+                        float dValue = ValueOfDiamond(d, unit);
                         if (d.allyTargetingId == null && bestActualValue < dValue)
                         {
                             bestDiamond = d;
@@ -439,16 +440,16 @@ namespace Blitz2022
                         }
                     }
                 }
-                
+
             }
 
             return bestDiamond;
         }
 
-        private float ValueOfDiamond(Diamond d, Unit u)
+        private float ValueOfDiamond(Diamond d, Position u)
         {
             //Heuristic pour la valeur ajoute d'une cible
-            return (float)(d.points+1) / (float)Distance(d.position, u.position);
+            return (float)(d.points+1) / (float)Distance(d.position, u);
         }
 
 
@@ -494,7 +495,7 @@ namespace Blitz2022
             return Math.Abs((diamond.x - unit.x)) + Math.Abs((diamond.y - unit.y));
         }
 
-        private Position findRandomSpawn(GameMessage gameMessage)
+        private Position findRandomSpawn(GameMessage gameMessage, Unit unit)
         {
             List<Position> spawns = new List<Position>();
             
@@ -514,7 +515,11 @@ namespace Blitz2022
                 }
                 x++;
             }
-            spawns.Sort((i, n) => Distance(i, findNearestDiamonds(gameMessage.map, i)).CompareTo(Distance(n, findNearestDiamonds(gameMessage.map, n))));
+
+            spawns.Sort((i, n) => {
+                return Distance(i, findBestNotTargetedDiamond(i).position).CompareTo(Distance(n, findBestNotTargetedDiamond(n).position));
+            });
+            
             //spawns = spawns.OrderBy(i => Distance(i, findNearestDiamonds(map, i)) <= 30);
    
             Position choosedSpawned = spawns.First();
@@ -541,8 +546,14 @@ namespace Blitz2022
                     }
                 }
                 if (validate)
+                {
+                    Diamond best = findBestNotTargetedDiamond(choosedSpawned);
+                    best.allyTargetingId = unit.id;
                     return choosedSpawned;
+                }
+
             }
+
             return choosedSpawned;
         }
         private bool checkAroundForEMPTY(Map map,Position position) 

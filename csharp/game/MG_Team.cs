@@ -60,6 +60,7 @@ namespace Blitz2022
         public bool hasSpawned;
         public bool isSummoning;
         public MG_UnitState lastState;
+        public 
 
         public MG_Unit(Unit original)
         {
