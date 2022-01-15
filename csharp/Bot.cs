@@ -54,41 +54,97 @@ namespace Blitz2022
                         actions.Add(new Action(UnitActionType.MOVE, u.id, getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize())));
                     }
                     else
-                        actions.Add(new Action(UnitActionType.MOVE, u.id, findNearestDiamonds(gameMessage.map, u, myTeam)));
+                    {
+                        //kill if ennemy aside..
+
+                        //vine an ennemy with diamond if possible
+                        Unit toVine = canVineSomeone(u, gameMessage);
+                        if(toVine != null)
+                            actions.Add(new Action(UnitActionType.VINE, u.id, toVine.position));
+
+                        //Spot and gove nearest diamond
+                        Position target = findNearestDiamonds(gameMessage.map, u);
+                        if(target.x == 1000)
+                            target = getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize());
+
+                        actions.Add(new Action(UnitActionType.MOVE, u.id, target));
+                    }
                 }
             }
 
             return new GameCommand(actions);
         }
 
-        private Position findNearestDiamonds(Map map, Unit unit, Team team) 
+        private Unit canVineSomeone(Unit u, GameMessage gameMessage)
         {
-            Diamond nearest = map.diamonds[0];
-            Diamond before = map.diamonds[0];
-            int distanceNearest = 0;
-            int distanceDiamond = 0;
 
-            distanceNearest = Distance(nearest.position, unit.position);
-            foreach (Diamond diamonds in map.diamonds)
+            foreach (Team team in gameMessage.teams)
             {
-                distanceDiamond = Distance(diamonds.position, unit.position);
-                if (diamonds.ownerId == null && distanceDiamond < distanceNearest)
+                if (team.id != gameMessage.teamId)
                 {
-                    nearest = diamonds;
-                    foreach (Unit u in team.units)
+                    foreach (Unit ennemy in team.units)
                     {
-                        if (Distance(diamonds.position, u.position) < distanceDiamond && !u.hasDiamond)
+                        //for each ennemy
+                        if (ennemy.position.x == u.position.x || ennemy.position.y == u.position.y)
                         {
-                            nearest = before;
-                            break;
+                            if (ennemy.hasDiamond)
+                            {
+                                //check if vines can go
+                                TileType[] obstacles = getTilesBetweenPos(gameMessage.map, u.position, ennemy.position);
+                                Boolean canVine = true;
+                                foreach (TileType tile in obstacles)
+                                {
+                                    if (tile == TileType.SPAWN || tile == TileType.WALL) { canVine = false; break; }
+                                }
+                                if (canVine)
+                                {
+                                    return ennemy;
+                                }
+                            }
                         }
                     }
-                    distanceNearest = Distance(nearest.position, unit.position);
-                    before = nearest;
                 }
             }
 
-            return nearest.position;
+            return null;
+        }
+
+
+        private Position findNearestDiamonds(Map map, Unit unit)
+        {
+            Position nearest = new Position(1000, 1000);
+            foreach (Diamond diamonds in map.diamonds)
+            {
+                if (diamonds.ownerId == null && Distance(diamonds.position, unit.position) < Distance(nearest, unit.position))
+                    nearest = diamonds.position;
+            }
+            return nearest;
+        }
+
+        private TileType[] getTilesBetweenPos(Map map, Position from, Position target)
+        {
+            TileType[] tiles = null;
+            if(from.y == target.y)
+            {
+                int distance = Math.Abs(from.x - target.x);
+                int Backward = (target.x - from.x) / distance; //give 1 or -1
+                tiles = new TileType[distance - 1];
+                for(int i = 1; i < tiles.Count(); i++)
+                {
+                    tiles[i] = map.getTileTypeAt(new Position(from.x + (i * Backward), from.y));
+                }
+            }
+            else if(from.x == target.x)
+            {
+                int distance = Math.Abs(from.y - target.y);
+                int Backward = (target.y - from.y) / distance; //give 1 or -1
+                tiles = new TileType[distance - 1];
+                for (int i = 1; i < tiles.Count(); i++)
+                {
+                    tiles[i] = map.getTileTypeAt(new Position(from.x, from.y + (i * Backward)));
+                }
+            }
+            return tiles;
         }
 
         private int Distance(Position diamond, Position unit)
