@@ -557,6 +557,35 @@ namespace Blitz2022
             return units;
         }
 
+        private bool isVinable(GameMessage gm, Position unitPosition, char axis)
+        {
+            switch(axis)
+            {
+                case 'x':
+                    foreach (Team t in gm.teams)
+                    {
+                        foreach (Unit u in t.units)
+                        {
+                            if (u.position.x == unitPosition.x)
+                                return true;
+                        }
+                    }
+                    return false;
+                case 'y':
+                    foreach (Team t in gm.teams)
+                    {
+                        foreach (Unit u in t.units)
+                        {
+                            if (u.position.x == unitPosition.y)
+                                return true;
+                        }
+                    }
+                    return false;
+                default:
+                    return false;
+            }
+        }
+
         private int getAbsoluteDistance(Position badGuyPos, Position goodGuyPos)
         {
             int x, y;
