@@ -81,6 +81,7 @@ namespace Blitz2022
         private Position findRandomSpawn(Map map)
         {
             List<Position> spawns = new List<Position>();
+            
             int x = 0;
             foreach (string[] tileX in map.tiles)
             {
@@ -88,7 +89,7 @@ namespace Blitz2022
                 foreach (string tileY in tileX)
                 {
                     var position = new Position(x, y);
-                    if (map.getTileTypeAt(position) == TileType.SPAWN)
+                    if (map.getTileTypeAt(position) == TileType.SPAWN && checkAroundForEMPTY(map, position))
                     {
                         spawns.Add(position);
                     }
@@ -97,6 +98,37 @@ namespace Blitz2022
                 x++;
             }
             return spawns[new Random().Next(spawns.Count)];
+        }
+        private bool checkAroundForEMPTY(Map map,Position position) 
+        {
+            bool retour = false;
+            Position cmp = position;
+            //regarde si la case à gauche est vide
+            cmp.x = position.x-1;
+            if (map.getTileTypeAt(cmp) == TileType.EMPTY) 
+            { 
+                retour = true;
+            }
+            //regarde si la case à droite est vide
+            cmp.x = position.x + 1;
+            if (map.getTileTypeAt(cmp) == TileType.EMPTY)
+            {
+                retour = true;
+            }
+            cmp.x = position.x;
+            //regarde si la case en bas est vide
+            cmp.y = position.y + 1;
+            if (map.getTileTypeAt(cmp) == TileType.EMPTY)
+            {
+                retour = true;
+            }
+            //reagarde si la case en haut est vide
+            cmp.y = position.y - 1;
+            if (map.getTileTypeAt(cmp) == TileType.EMPTY)
+            {
+                retour = true;
+            }
+            return retour;
         }
 
         private Position getRandomPosition(int horizontalSize, int verticalSize)
