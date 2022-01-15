@@ -232,32 +232,55 @@ namespace Blitz2022
 
         private Position DropD(Unit u, GameMessage gameMessage)
         {
-            if (gameMessage.map.doesTileExists(new Position(u.position.x, u.position.y + 1)))
+            Position p1 = new Position(u.position.x, u.position.y + 1);
+            Position p2 = new Position(u.position.x, u.position.y - 1);
+            Position p3 = new Position(u.position.x + 1, u.position.y);
+            Position p4 = new Position(u.position.x - 1, u.position.y);
+            if (gameMessage.map.doesTileExists(p1))
             {
-                if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + 1)) == TileType.EMPTY)
+                if (gameMessage.map.getTileTypeAt(p1) == TileType.EMPTY && getUnitOnTile(gameMessage, p1) == null)
                 {
-                    return new Position(u.position.x, u.position.y + 1);
+                    return p1;
                 }
             }
-            if (gameMessage.map.doesTileExists(new Position(u.position.x, u.position.y - 1)))
+            if (gameMessage.map.doesTileExists(p2))
             {
-                if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y - 1)) == TileType.EMPTY)
+                if (gameMessage.map.getTileTypeAt(p2) == TileType.EMPTY && getUnitOnTile(gameMessage, p2) == null)
                 {
-                    return new Position(u.position.x, u.position.y - 1);
+                    return p2;
                 }
             }
-            if (gameMessage.map.doesTileExists(new Position(u.position.x + 1, u.position.y)))
+            if (gameMessage.map.doesTileExists(p3))
             {
-                if (gameMessage.map.getTileTypeAt(new Position(u.position.x + 1, u.position.y)) == TileType.EMPTY)
+                if (gameMessage.map.getTileTypeAt(p3) == TileType.EMPTY && getUnitOnTile(gameMessage, p3) == null)
                 {
-                    return new Position(u.position.x + 1, u.position.y);
+                    return  p3;
                 }
             }
-            if (gameMessage.map.doesTileExists(new Position(u.position.x - 1, u.position.y)))
+            if (gameMessage.map.doesTileExists(p4))
             {
-                if (gameMessage.map.getTileTypeAt(new Position(u.position.x + 1, u.position.y)) == TileType.EMPTY)
+                if (gameMessage.map.getTileTypeAt(p4) == TileType.EMPTY && getUnitOnTile(gameMessage, p4) == null)
                 {
-                    return new Position(u.position.x - 1, u.position.y);
+                    return p4;
+                }
+            }
+
+            return null;
+        }
+
+        private Unit getUnitOnTile(GameMessage gameMessage, Position tile)
+        {
+            foreach (Team t in gameMessage.teams)
+            {
+                foreach (Unit u in t.units)
+                {
+                    if (u.hasSpawned)
+                    {
+                        if (u.position == tile)
+                        {
+                            return u;
+                        }
+                    }
                 }
             }
 
