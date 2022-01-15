@@ -54,26 +54,44 @@ namespace Blitz2022
                         actions.Add(new Action(UnitActionType.MOVE, u.id, getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize())));
                     }
                     else
-                        actions.Add(new Action(UnitActionType.MOVE, u.id, findNearestDiamonds(gameMessage.map, u)));
+                        actions.Add(new Action(UnitActionType.MOVE, u.id, findNearestDiamonds(gameMessage.map, u, myTeam)));
                 }
             }
 
             return new GameCommand(actions);
         }
 
-        private Position findNearestDiamonds(Map map, Unit unit) 
+        private Position findNearestDiamonds(Map map, Unit unit, Team team) 
         {
-            Position nearest = new Position(1000, 1000);
-            foreach(Diamond diamonds in map.diamonds)
+            Diamond nearest = map.diamonds[0];
+            Diamond before = map.diamonds[0];
+            int distanceNearest = 0;
+            int distanceDiamond = 0;
+
+            distanceNearest = Distance(nearest.position, unit.position);
+            foreach (Diamond diamonds in map.diamonds)
             {
-                if (diamonds.ownerId == null && distance(diamonds.position, unit.position) < distance(nearest, unit.position))
-                    nearest = diamonds.position;
+                distanceDiamond = Distance(diamonds.position, unit.position);
+                if (diamonds.ownerId == null && distanceDiamond < distanceNearest)
+                {
+                    nearest = diamonds;
+                    foreach (Unit u in team.units)
+                    {
+                        if (Distance(diamonds.position, u.position) < distanceDiamond && !u.hasDiamond)
+                        {
+                            nearest = before;
+                            break;
+                        }
+                    }
+                    distanceNearest = Distance(nearest.position, unit.position);
+                    before = nearest;
+                }
             }
 
-            return nearest;
+            return nearest.position;
         }
 
-        private int distance(Position diamond, Position unit)
+        private int Distance(Position diamond, Position unit)
         {
             return Math.Abs((diamond.x - unit.x)) + Math.Abs((diamond.y - unit.y));
         }
