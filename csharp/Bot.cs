@@ -29,13 +29,19 @@ namespace Blitz2022
 
             List<Action> actions = new List<Action>();
             actions.AddRange(deadUnits.Select(unit => new Action(UnitActionType.SPAWN, unit.id, findRandomSpawn(gameMessage.map))).ToList<Action>());
-            if (gameMessage.tick == gameMessage.totalTick - 2)
-            {
-                actions.AddRange(aliveUnits.Select(unit => new Action(UnitActionType.DROP, unit.id, new Position(unit.position.x, unit.position.y +1))).ToList<Action>());
+                foreach(Unit u in aliveUnits)
+                {
+                    if(gameMessage.tick == gameMessage.totalTick - 2)
+                    {
+                        if (u.hasDiamond)
+                        {
+                            actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x, u.position.y + 1)));
+                        }
+                    }
+                    else
+                    //actions.AddRange(aliveUnits.Select(unit => new Action(UnitActionType.MOVE, unit.id, getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize()))).ToList<Action>());
+                    actions.Add(new Action(UnitActionType.MOVE, u.id, getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize())));
             }
-                
-            else
-                actions.AddRange(aliveUnits.Select(unit => new Action(UnitActionType.MOVE, unit.id, getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize()))).ToList<Action>());
 
             return new GameCommand(actions);
         }
