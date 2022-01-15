@@ -49,7 +49,7 @@ namespace Blitz2022
                         {
                             //seuil todo: a changer
                             Position dropPos = DropD(u, gameMessage);
-                            if (gameMessage.map.getDiamondById(u.diamondId).points > 67 && dropPos != null)
+                            if (gameMessage.map.getDiamondById(u.diamondId).points > 67 && dropPos != null && closestEnnemyDistance(gameMessage, u.position) > 1)
                             {
                                 actions.Add(new Action(UnitActionType.DROP, u.id, dropPos));
                             }
@@ -62,19 +62,25 @@ namespace Blitz2022
                                 }
                                 else
                                 {
-                                    Position ennemy = closestEnnemies(gameMessage, u.position).First().position;
-                                    int xDist = Math.Abs(ennemy.x - u.position.x);
-                                    int yDist = Math.Abs(ennemy.y - u.position.y);
-                                    int forward = 1;
-                                    if (xDist < yDist)
+                                    List<Unit> ennemies = closestEnnemies(gameMessage, u.position);
+                                    if (ennemies.Count > 0)
                                     {
-                                        forward = (ennemy.x - u.position.x) / xDist;
-                                        actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x + forward, u.position.y)));
-                                    }
-                                    else
-                                    {
-                                        forward = (ennemy.y - u.position.y) / yDist;
-                                        actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x, u.position.y + forward)));
+                                        Position ennemy = ennemies[0].position;
+                                        int xDist = Math.Abs(ennemy.x - u.position.x);
+                                        int yDist = Math.Abs(ennemy.y - u.position.y);
+                                        int forward = 1;
+                                        if (xDist < yDist)
+                                        {
+                                            if(xDist != 0)
+                                                forward = (ennemy.x - u.position.x) / xDist;
+                                            actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x + forward, u.position.y)));
+                                        }
+                                        else
+                                        {
+                                            if(yDist != 0)
+                                                forward = (ennemy.y - u.position.y) / yDist;
+                                            actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x, u.position.y + forward)));
+                                        }
                                     }
 
                                 }
