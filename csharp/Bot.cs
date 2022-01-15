@@ -78,14 +78,14 @@ namespace Blitz2022
                                         if (xDist <= yDist)
                                         {
                                             if(xDist != 0)
-                                                forward = (threat.x - u.position.x) / xDist;
+                                                forward = -((threat.x - u.position.x) / xDist);
                                             if(gameMessage.map.getTileTypeAt(new Position(u.position.x + forward, u.position.y)) != TileType.SPAWN && gameMessage.map.getTileTypeAt(new Position(u.position.x + forward, u.position.y)) != TileType.WALL)
                                                 actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x + forward, u.position.y)));
                                             else if (gameMessage.map.getTileTypeAt(new Position(u.position.x - forward, u.position.y)) != TileType.SPAWN && gameMessage.map.getTileTypeAt(new Position(u.position.x - forward, u.position.y)) != TileType.WALL && xDist == 0)
                                                 actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x - forward, u.position.y)));
                                             else
                                             {
-                                                forward = (threat.y - u.position.y) / yDist;
+                                                forward = -((threat.y - u.position.y) / yDist);
                                                 if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + forward)) != TileType.SPAWN && gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + forward)) != TileType.WALL)
                                                     actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x, u.position.y + forward)));
                                                 else
@@ -97,7 +97,7 @@ namespace Blitz2022
                                         else
                                         {
                                             if(yDist != 0)
-                                                forward = (threat.y - u.position.y) / yDist;
+                                                forward = -((threat.y - u.position.y) / yDist);
                                             if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + forward)) != TileType.SPAWN && gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + forward)) != TileType.WALL)
                                                 actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x, u.position.y + forward)));
                                             else if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y - forward)) != TileType.SPAWN && gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y - forward)) != TileType.WALL && yDist == 0)
@@ -105,7 +105,7 @@ namespace Blitz2022
                                             else
                                             {
                                                 if (xDist != 0)
-                                                    forward = (threat.x - u.position.x) / xDist;
+                                                    forward = -((threat.x - u.position.x) / xDist);
                                                 if (gameMessage.map.getTileTypeAt(new Position(u.position.x + forward, u.position.y)) != TileType.SPAWN && gameMessage.map.getTileTypeAt(new Position(u.position.x + forward, u.position.y)) != TileType.WALL)
                                                     actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x + forward, u.position.y)));
                                                 else
@@ -314,6 +314,17 @@ namespace Blitz2022
             return nearest;
         }
 
+        private Position findNearestDiamonds(Map map, Position position)
+        {
+            Position nearest = new Position(1000, 1000);
+            foreach (Diamond diamonds in map.diamonds)
+            {
+                if (diamonds.ownerId == null && Distance(diamonds.position, position) < Distance(nearest, position))
+                    nearest = diamonds.position;
+            }
+            return nearest;
+        }
+
         private TileType[] getTilesBetweenPos(Map map, Position from, Position target)
         {
             TileType[] tiles = null;
@@ -365,6 +376,7 @@ namespace Blitz2022
                 }
                 x++;
             }
+            spawns = spawns.Where(i => Distance(i, findNearestDiamonds(map, i)) <= 100).ToList();
             return spawns[new Random().Next(spawns.Count)];
         }
         private bool checkAroundForEMPTY(Map map,Position position) 
