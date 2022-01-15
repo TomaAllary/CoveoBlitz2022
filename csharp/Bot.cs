@@ -149,11 +149,11 @@ namespace Blitz2022
                                         //actions.Add(new Action(UnitActionType.ATTACK, u.id, au.position));
                                     }                                      
                                 }
-                                if(actuallyAttackableUnits.Count() == 1)
+                                if(actuallyAttackableUnits.Count() == 1 && gameMessage.map.getTileTypeAt(actuallyAttackableUnits.First().position) != TileType.SPAWN)
                                     actions.Add(new Action(UnitActionType.ATTACK, u.id, actuallyAttackableUnits.First().position));
                                 else if(actuallyAttackableUnits.Count == 0)
                                 {
-                                    if(attackableUnits.Count() == 1)
+                                    if(attackableUnits.Count() == 1 && gameMessage.map.getTileTypeAt(attackableUnits.First().position) != TileType.SPAWN)
                                         actions.Add(new Action(UnitActionType.ATTACK, u.id, attackableUnits.First().position));
                                     else
                                     {
@@ -163,7 +163,7 @@ namespace Blitz2022
                                                 hasDiamond.Add(au);
                                         }
                                         //If many target have diamonds, we will attack the one whose has most points
-                                        if(hasDiamond.Count() > 0)
+                                        if(hasDiamond.Count() > 0 && gameMessage.map.getTileTypeAt(pickBestScore(hasDiamond, gameMessage).position) != TileType.SPAWN)
                                         {
                                             actions.Add(new Action(UnitActionType.ATTACK, u.id, pickBestScore(hasDiamond, gameMessage).position));
                                         }
@@ -178,12 +178,12 @@ namespace Blitz2022
                                             hasDiamond.Add(aau);
                                     }
                                     //If many target have diamonds, we will attack the one whose has most points
-                                    if (hasDiamond.Count() > 0)
+                                    if (hasDiamond.Count() > 0 && gameMessage.map.getTileTypeAt(pickBestScore(hasDiamond, gameMessage).position) != TileType.SPAWN)
                                     {
                                         actions.Add(new Action(UnitActionType.ATTACK, u.id, pickBestScore(hasDiamond, gameMessage).position));
                                     }
                                     //If none has a diamond, we still kill one of them.. for.. fun? 
-                                    else
+                                    else if(gameMessage.map.getTileTypeAt(pickBestScore(actuallyAttackableUnits, gameMessage).position) != TileType.SPAWN)
                                     {
                                         actions.Add(new Action(UnitActionType.ATTACK, u.id, pickBestScore(actuallyAttackableUnits, gameMessage).position));
                                     }
