@@ -29,20 +29,28 @@ namespace Blitz2022
 
             List<Action> actions = new List<Action>();
             actions.AddRange(deadUnits.Select(unit => new Action(UnitActionType.SPAWN, unit.id, findRandomSpawn(gameMessage.map))).ToList<Action>());
-                foreach(Unit u in aliveUnits)
-                {
+
+
+            foreach(Unit u in aliveUnits)
+            {
                 if (gameMessage.tick == gameMessage.totalTick - 2)
                 {
                     if (u.hasDiamond)
                     {
-                        actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x, u.position.y + 1)));
+                        if(gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + 1)) == TileType.EMPTY)
+                            actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x, u.position.y + 1)));
+                        else if(gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y - 1)) == TileType.EMPTY)
+                            actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x, u.position.y - 1)));
+                        else if(gameMessage.map.getTileTypeAt(new Position(u.position.x + 1, u.position.y)) == TileType.EMPTY)
+                            actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x + 1, u.position.y)));
+                        else
+                            actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x - 1, u.position.y)));
                     }
                 }
                 else
                 {
                     if (u.hasDiamond)
                     {
-                        //actions.AddRange(aliveUnits.Select(unit => new Action(UnitActionType.MOVE, unit.id, getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize()))).ToList<Action>());
                         actions.Add(new Action(UnitActionType.MOVE, u.id, getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize())));
                     }
                     else
@@ -55,7 +63,7 @@ namespace Blitz2022
 
         private Position findNearestDiamonds(Map map, Unit unit) 
         {
-            Diamond nearest = map.diamonds.first();
+            Diamond nearest = map.diamonds[0];
             foreach(Diamond diamonds in map.diamonds)
             {
                 if (distance(diamonds.position, unit.position) < distance(nearest.position, unit.position))
