@@ -20,6 +20,8 @@ namespace Blitz2022
             public int summonLevel;
             public int points;
             public string ownerId;
+
+            public string allyTargetingId;
         }
 
         public class Position

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Blitz2022;
+using static Blitz2022.Map;
 
 namespace Blitz2022
 {
@@ -61,6 +62,26 @@ namespace Blitz2022
                 team.UpdateValues(orginalTeams[team.id]);
             }
             map.UpdateValues(original.map);
+
+            //Refreash diamonds targets
+            foreach(Diamond d in map.diamonds)
+            {
+                d.allyTargetingId = null;
+            }
+        }
+
+        public MG_Team getTeamByUnitId(string id)
+        {
+            foreach (MG_Team team in this.teams)
+            {
+                foreach (MG_Unit unit in team.units)
+                {
+                    if (unit.id == id)
+                        return team;
+                }
+            }
+
+            return null;
         }
 
 

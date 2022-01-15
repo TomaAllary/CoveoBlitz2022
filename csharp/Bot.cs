@@ -201,8 +201,11 @@ namespace Blitz2022
 
                                 else
                                 {
-                                    //Spot and gove nearest diamond
-                                    Position target = findNearestDiamonds(gameMessage.map, u);
+                                    //Spot and move nearest diamond
+                                    Diamond best = findBestNotTargetedDiamond(u);
+                                    Position target = nearestWalkablePos(best.position);
+
+                                    mG_GameMessage.map.getDiamondById(best.id).allyTargetingId = u.id;
                                     if (target.x == 1000)
                                         target = getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize());
 
@@ -240,6 +243,8 @@ namespace Blitz2022
             }
             return winner;
         }
+
+
 
         private Position DropD(Unit u, GameMessage gameMessage)
         {
@@ -279,6 +284,45 @@ namespace Blitz2022
             return null;
         }
 
+        private Position nearestWalkablePos(Position target)
+        {
+            if (mG_GameMessage.map.getTileTypeAt(target) == TileType.EMPTY && getUnitOnTile(mG_GameMessage, target) == null)
+                return target;
+
+            Position p1 = new Position(target.x, target.y + 1);
+            Position p2 = new Position(target.x, target.y - 1);
+            Position p3 = new Position(target.x + 1, target.y);
+            Position p4 = new Position(target.x - 1, target.y);
+            Position backup = p1;
+            if (mG_GameMessage.map.doesTileExists(p1))
+            {
+                backup = p1;
+                if (mG_GameMessage.map.getTileTypeAt(p1) == TileType.EMPTY && getUnitOnTile(mG_GameMessage, p1) == null)
+                    return p1;
+            }
+            if (mG_GameMessage.map.doesTileExists(p2))
+            {
+                backup = p2;
+                if (mG_GameMessage.map.getTileTypeAt(p2) == TileType.EMPTY && getUnitOnTile(mG_GameMessage, p2) == null)
+                    return p2;
+            }
+            if (mG_GameMessage.map.doesTileExists(p3))
+            {
+                backup = p3;
+                if (mG_GameMessage.map.getTileTypeAt(p3) == TileType.EMPTY && getUnitOnTile(mG_GameMessage, p3) == null)
+                    return p3;
+            }
+            if (mG_GameMessage.map.doesTileExists(p4))
+            {
+                backup = p4;
+                if (mG_GameMessage.map.getTileTypeAt(p4) == TileType.EMPTY && getUnitOnTile(mG_GameMessage, p4) == null)
+                    return p4;
+            }
+
+            return backup;
+
+        }
+
         private Unit getUnitOnTile(GameMessage gameMessage, Position tile)
         {
             foreach (Team t in gameMessage.teams)
@@ -287,7 +331,7 @@ namespace Blitz2022
                 {
                     if (u.hasSpawned)
                     {
-                        if (u.position == tile)
+                        if (u.position.x == tile.x && u.position.y == tile.y)
                         {
                             return u;
                         }
@@ -298,6 +342,25 @@ namespace Blitz2022
             return null;
         }
 
+
+        private MG_Unit getUnitOnTile(MG_GameMessage gameMessage, Position tile)
+        {
+            foreach (MG_Team t in gameMessage.teams)
+            {
+                foreach (MG_Unit u in t.units)
+                {
+                    if (u.hasSpawned)
+                    {
+                        if (u.position.x == tile.x && u.position.y == tile.y)
+                        {
+                            return u;
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
         private Unit canVineSomeone(Unit u, GameMessage gameMessage)
         {
 
@@ -347,6 +410,47 @@ namespace Blitz2022
             }
             return nearest;
         }
+
+        private Diamond findBestNotTargetedDiamond(Unit u)
+        {
+            Diamond bestDiamond = mG_GameMessage.map.diamonds[0];
+            float bestActualValue = 0;
+            foreach(Diamond d in mG_GameMessage.map.diamonds)
+            {
+                if(d.ownerId == null)
+                {
+                    float dValue = ValueOfDiamond(d, u);
+                    if (d.allyTargetingId == null && bestActualValue < dValue)
+                    {
+                        bestDiamond = d;
+                        bestActualValue = dValue;
+                    }
+                }
+                else
+                {
+                    MG_Team t = mG_GameMessage.getTeamByUnitId(d.ownerId);
+                    if (t != null && u.teamId != t.id)
+                    {
+                        float dValue = ValueOfDiamond(d, u);
+                        if (d.allyTargetingId == null && bestActualValue < dValue)
+                        {
+                            bestDiamond = d;
+                            bestActualValue = dValue;
+                        }
+                    }
+                }
+                
+            }
+
+            return bestDiamond;
+        }
+
+        private float ValueOfDiamond(Diamond d, Unit u)
+        {
+            //Heuristic pour la valeur ajoute d'une cible
+            return (float)(d.points+1) / (float)Distance(d.position, u.position);
+        }
+
 
         private Position findNearestDiamonds(Map map, Position position)
         {

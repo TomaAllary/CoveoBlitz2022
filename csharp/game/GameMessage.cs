@@ -30,5 +30,19 @@ namespace Blitz2022
         {
             get { return this.teams.ToDictionary(team => team.id, team => team); }
         }
+
+        public Team getTeamByUnitId(string id)
+        {
+            foreach(Team team in this.teams)
+            {
+                foreach(Unit unit in team.units)
+                {
+                    if(unit.id == id)
+                        return team;
+                }
+            }
+
+            return null;
+        }
     }
 }
