@@ -29,7 +29,7 @@ namespace Blitz2022
                 List<Unit> aliveUnits = unitsByLifeStatus.ContainsKey(true) ? unitsByLifeStatus[true] : new List<Unit>();
 
                 List<Action> actions = new List<Action>();
-                actions.AddRange(deadUnits.Select(unit => new Action(UnitActionType.SPAWN, unit.id, findRandomSpawn(gameMessage.map))).ToList<Action>());
+                actions.AddRange(deadUnits.Select(unit => new Action(UnitActionType.SPAWN, unit.id, findRandomSpawn(gameMessage))).ToList<Action>());
 
 
                 foreach (Unit u in aliveUnits)
@@ -356,19 +356,19 @@ namespace Blitz2022
             return Math.Abs((diamond.x - unit.x)) + Math.Abs((diamond.y - unit.y));
         }
 
-        private Position findRandomSpawn(Map map)
+        private Position findRandomSpawn(GameMessage gameMessage)
         {
             List<Position> spawns = new List<Position>();
             
             int x = 0;
-            foreach (string[] tileX in map.tiles)
+            foreach (string[] tileX in gameMessage.map.tiles)
             {
                 int y = 0;
                 foreach (string tileY in tileX)
                 {
                     var position = new Position(x, y);
                     //if (map.getTileTypeAt(position) == TileType.SPAWN && checkAroundForEMPTY(map, position))
-                    if (map.getTileTypeAt(position) == TileType.SPAWN)
+                    if (gameMessage.map.getTileTypeAt(position) == TileType.SPAWN)
                     {
                         spawns.Add(position);
                     }
@@ -376,8 +376,36 @@ namespace Blitz2022
                 }
                 x++;
             }
-            spawns = spawns.Where(i => Distance(i, findNearestDiamonds(map, i)) <= 100).ToList();
-            return spawns[new Random().Next(spawns.Count)];
+            spawns.Sort((i, n) => Distance(i, findNearestDiamonds(gameMessage.map, i)).CompareTo(Distance(n, findNearestDiamonds(gameMessage.map, n))));
+            //spawns = spawns.OrderBy(i => Distance(i, findNearestDiamonds(map, i)) <= 30);
+   
+            Position choosedSpawned = spawns.First();
+            foreach (Position spawn in spawns)
+            {
+                choosedSpawned = spawn;
+                bool validate = true;
+                foreach (Team t in gameMessage.teams)
+                {
+                    foreach (Unit u in t.units)
+                    {
+                        if (u.hasSpawned)
+                        {
+                            if (u.position.x == choosedSpawned.x && u.position.y == choosedSpawned.y)
+                            {
+                                validate = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (!validate)
+                    {
+                        break;
+                    }
+                }
+                if (validate)
+                    return choosedSpawned;
+            }
+            return choosedSpawned;
         }
         private bool checkAroundForEMPTY(Map map,Position position) 
         {
