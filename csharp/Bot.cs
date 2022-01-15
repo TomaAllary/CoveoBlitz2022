@@ -63,23 +63,54 @@ namespace Blitz2022
                                 else
                                 {
                                     List<Unit> ennemies = closestEnnemies(gameMessage, u.position);
-                                    if (ennemies.Count > 0)
+                                    List<Unit> threats = new List<Unit>();
+                                    foreach (Unit ennemy in ennemies)
                                     {
-                                        Position ennemy = ennemies[0].position;
-                                        int xDist = Math.Abs(ennemy.x - u.position.x);
-                                        int yDist = Math.Abs(ennemy.y - u.position.y);
+                                        if (!ennemy.hasDiamond)
+                                            threats.Add(ennemy);
+                                    }
+                                    if (threats.Count > 0)
+                                    {
+                                        Position threat = threats[0].position;
+                                        int xDist = Math.Abs(threat.x - u.position.x);
+                                        int yDist = Math.Abs(threat.y - u.position.y);
                                         int forward = 1;
-                                        if (xDist < yDist)
+                                        if (xDist <= yDist)
                                         {
                                             if(xDist != 0)
-                                                forward = (ennemy.x - u.position.x) / xDist;
-                                            actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x + forward, u.position.y)));
+                                                forward = (threat.x - u.position.x) / xDist;
+                                            if(gameMessage.map.getTileTypeAt(new Position(u.position.x + forward, u.position.y)) != TileType.SPAWN && gameMessage.map.getTileTypeAt(new Position(u.position.x + forward, u.position.y)) != TileType.WALL)
+                                                actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x + forward, u.position.y)));
+                                            else if (gameMessage.map.getTileTypeAt(new Position(u.position.x - forward, u.position.y)) != TileType.SPAWN && gameMessage.map.getTileTypeAt(new Position(u.position.x - forward, u.position.y)) != TileType.WALL && xDist == 0)
+                                                actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x - forward, u.position.y)));
+                                            else
+                                            {
+                                                forward = (threat.y - u.position.y) / yDist;
+                                                if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + forward)) != TileType.SPAWN && gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + forward)) != TileType.WALL)
+                                                    actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x, u.position.y + forward)));
+                                                else
+                                                    DropD(u, gameMessage);
+                                            }
+                                                
+
                                         }
                                         else
                                         {
                                             if(yDist != 0)
-                                                forward = (ennemy.y - u.position.y) / yDist;
-                                            actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x, u.position.y + forward)));
+                                                forward = (threat.y - u.position.y) / yDist;
+                                            if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + forward)) != TileType.SPAWN && gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + forward)) != TileType.WALL)
+                                                actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x, u.position.y + forward)));
+                                            else if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y - forward)) != TileType.SPAWN && gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y - forward)) != TileType.WALL && yDist == 0)
+                                                    actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x, u.position.y - forward)));
+                                            else
+                                            {
+                                                if (xDist != 0)
+                                                    forward = (threat.x - u.position.x) / xDist;
+                                                if (gameMessage.map.getTileTypeAt(new Position(u.position.x + forward, u.position.y)) != TileType.SPAWN && gameMessage.map.getTileTypeAt(new Position(u.position.x + forward, u.position.y)) != TileType.WALL)
+                                                    actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x + forward, u.position.y)));
+                                                else
+                                                    DropD(u, gameMessage);
+                                            }
                                         }
                                     }
 
