@@ -151,7 +151,7 @@ namespace Blitz2022
                             {
                                 //vine an ennemy with diamond if possible
                                 Unit toVine = canVineSomeone(u, gameMessage);
-                                if (toVine != null)
+                                if (toVine != null && gameMessage.map.getTileTypeAt(u.position) != TileType.SPAWN)
                                     actions.Add(new Action(UnitActionType.VINE, u.id, toVine.position));
                                 else
                                 {
