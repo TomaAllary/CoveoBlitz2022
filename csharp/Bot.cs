@@ -89,31 +89,82 @@ namespace Blitz2022
                         else
                         {
                             //kill if ennemy aside..
-                            if (closestEnnemyDistance(gameMessage, u.position) == 1)
+                            if (closestEnnemyDistance(gameMessage, u.position) == 1 && gameMessage.map.getTileTypeAt(u.position) != TileType.SPAWN)
                             {
                                 List<Unit> attackableUnits = closestEnnemies(gameMessage, u.position);
+                                List<Unit> hasDiamond = new List<Unit>();
+                                List<Unit> actuallyAttackableUnits = new List<Unit>();
                                 foreach(Unit au in attackableUnits)
                                 {
                                     if (doWePlayBeforeThem(au.teamId, gameMessage))
                                     {
-                                        actions.Add(new Action(UnitActionType.ATTACK, u.id, au.position));
-                                        break;
+                                        actuallyAttackableUnits.Add(au);
+                                        //actions.Add(new Action(UnitActionType.ATTACK, u.id, au.position));
                                     }                                      
                                 }
-                                
+                                if(actuallyAttackableUnits.Count() == 1)
+                                    actions.Add(new Action(UnitActionType.ATTACK, u.id, actuallyAttackableUnits.First().position));
+                                else if(actuallyAttackableUnits.Count == 0)
+                                {
+                                    if(attackableUnits.Count() == 1)
+                                        actions.Add(new Action(UnitActionType.ATTACK, u.id, attackableUnits.First().position));
+                                    else
+                                    {
+                                        foreach(Unit au in attackableUnits)
+                                        {
+                                            if (au.hasDiamond)
+                                                hasDiamond.Add(au);
+                                        }
+                                        //If many target have diamonds, we will attack the one whose has most points
+                                        if(hasDiamond.Count() > 0)
+                                        {
+                                            actions.Add(new Action(UnitActionType.ATTACK, u.id, pickBestScore(hasDiamond, gameMessage).position));
+                                        }
+                                    }
+                                }
+                                //If there is more than one possible target we are sure to kill
+                                else
+                                {
+                                    foreach (Unit aau in actuallyAttackableUnits)
+                                    {
+                                        if (aau.hasDiamond)
+                                            hasDiamond.Add(aau);
+                                    }
+                                    //If many target have diamonds, we will attack the one whose has most points
+                                    if (hasDiamond.Count() > 0)
+                                    {
+                                        actions.Add(new Action(UnitActionType.ATTACK, u.id, pickBestScore(hasDiamond, gameMessage).position));
+                                    }
+                                    //If none has a diamond, we still kill one of them.. for.. fun? 
+                                    else
+                                    {
+                                        actions.Add(new Action(UnitActionType.ATTACK, u.id, pickBestScore(actuallyAttackableUnits, gameMessage).position));
+                                    }
+                                }
                             }
+                            /*
+                             
+                             PROBLEM TO FIX HERE IF MANY ACTIONS POSSIBLE WILL TRY TO DO THEM ALL
+                             
+                             */
+                            else
+                            {
+                                //vine an ennemy with diamond if possible
+                                Unit toVine = canVineSomeone(u, gameMessage);
+                                if (toVine != null)
+                                    actions.Add(new Action(UnitActionType.VINE, u.id, toVine.position));
+                                else
+                                {
+                                    //Spot and gove nearest diamond
+                                    Position target = findNearestDiamonds(gameMessage.map, u);
+                                    if (target.x == 1000)
+                                        target = getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize());
 
-                            //vine an ennemy with diamond if possible
-                            Unit toVine = canVineSomeone(u, gameMessage);
-                            if (toVine != null)
-                                actions.Add(new Action(UnitActionType.VINE, u.id, toVine.position));
+                                    actions.Add(new Action(UnitActionType.MOVE, u.id, target));
+                                }
 
-                            //Spot and gove nearest diamond
-                            Position target = findNearestDiamonds(gameMessage.map, u);
-                            if (target.x == 1000)
-                                target = getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize());
-
-                            actions.Add(new Action(UnitActionType.MOVE, u.id, target));
+                            }
+                           
                         }
                     }
                 }
@@ -127,6 +178,22 @@ namespace Blitz2022
             }
         }
 
+        // Receives a list of units and return the one whose team has the best score (if more than one has the same score, will return the first on these)
+        private Unit pickBestScore(List<Unit> units, GameMessage gm)
+        {
+            int teamScore = 0;
+            Unit winner = null;
+
+            foreach (Unit u in units)
+            {
+                if (gm.getTeamsMapById[u.teamId].score > teamScore)
+                {
+                    teamScore = gm.getTeamsMapById[u.teamId].score;
+                    winner = u;
+                }
+            }
+            return winner;
+        }
 
         private Position DropD(Unit u, GameMessage gameMessage)
         {
