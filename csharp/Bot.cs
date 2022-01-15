@@ -163,7 +163,8 @@ namespace Blitz2022
                 foreach (string tileY in tileX)
                 {
                     var position = new Position(x, y);
-                    if (map.getTileTypeAt(position) == TileType.SPAWN && checkAroundForEMPTY(map, position))
+                    //if (map.getTileTypeAt(position) == TileType.SPAWN && checkAroundForEMPTY(map, position))
+                    if (map.getTileTypeAt(position) == TileType.SPAWN)
                     {
                         spawns.Add(position);
                     }
