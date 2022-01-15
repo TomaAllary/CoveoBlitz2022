@@ -21,58 +21,65 @@ namespace Blitz2022
         */
         public GameCommand nextMove(GameMessage gameMessage)
         {
-            Team myTeam = gameMessage.getTeamsMapById[gameMessage.teamId];
+            try {
+                Team myTeam = gameMessage.getTeamsMapById[gameMessage.teamId];
 
-            var unitsByLifeStatus = myTeam.units.GroupBy(unit => unit.hasSpawned).ToDictionary(group => group.Key, group => group.ToList());
-            List<Unit> deadUnits = unitsByLifeStatus.ContainsKey(false) ? unitsByLifeStatus[false] : new List<Unit>();
-            List<Unit> aliveUnits = unitsByLifeStatus.ContainsKey(true) ? unitsByLifeStatus[true] : new List<Unit>();
+                var unitsByLifeStatus = myTeam.units.GroupBy(unit => unit.hasSpawned).ToDictionary(group => group.Key, group => group.ToList());
+                List<Unit> deadUnits = unitsByLifeStatus.ContainsKey(false) ? unitsByLifeStatus[false] : new List<Unit>();
+                List<Unit> aliveUnits = unitsByLifeStatus.ContainsKey(true) ? unitsByLifeStatus[true] : new List<Unit>();
 
-            List<Action> actions = new List<Action>();
-            actions.AddRange(deadUnits.Select(unit => new Action(UnitActionType.SPAWN, unit.id, findRandomSpawn(gameMessage.map))).ToList<Action>());
+                List<Action> actions = new List<Action>();
+                actions.AddRange(deadUnits.Select(unit => new Action(UnitActionType.SPAWN, unit.id, findRandomSpawn(gameMessage.map))).ToList<Action>());
 
 
-            foreach(Unit u in aliveUnits)
-            {
-                if (gameMessage.tick == gameMessage.totalTick - 2)
+                foreach (Unit u in aliveUnits)
                 {
-                    if (u.hasDiamond)
+                    if (gameMessage.tick == gameMessage.totalTick - 2)
                     {
-                        if(gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + 1)) == TileType.EMPTY)
-                            actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x, u.position.y + 1)));
-                        else if(gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y - 1)) == TileType.EMPTY)
-                            actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x, u.position.y - 1)));
-                        else if(gameMessage.map.getTileTypeAt(new Position(u.position.x + 1, u.position.y)) == TileType.EMPTY)
-                            actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x + 1, u.position.y)));
-                        else
-                            actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x - 1, u.position.y)));
-                    }
-                }
-                else
-                {
-                    if (u.hasDiamond)
-                    {
-                        actions.Add(new Action(UnitActionType.MOVE, u.id, getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize())));
+                        if (u.hasDiamond)
+                        {
+                            if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + 1)) == TileType.EMPTY)
+                                actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x, u.position.y + 1)));
+                            else if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y - 1)) == TileType.EMPTY)
+                                actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x, u.position.y - 1)));
+                            else if (gameMessage.map.getTileTypeAt(new Position(u.position.x + 1, u.position.y)) == TileType.EMPTY)
+                                actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x + 1, u.position.y)));
+                            else
+                                actions.Add(new Action(UnitActionType.DROP, u.id, new Position(u.position.x - 1, u.position.y)));
+                        }
                     }
                     else
                     {
-                        //kill if ennemy aside..
+                        if (u.hasDiamond)
+                        {
+                            actions.Add(new Action(UnitActionType.MOVE, u.id, getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize())));
+                        }
+                        else
+                        {
+                            //kill if ennemy aside..
 
-                        //vine an ennemy with diamond if possible
-                        Unit toVine = canVineSomeone(u, gameMessage);
-                        if(toVine != null)
-                            actions.Add(new Action(UnitActionType.VINE, u.id, toVine.position));
+                            //vine an ennemy with diamond if possible
+                            Unit toVine = canVineSomeone(u, gameMessage);
+                            if (toVine != null)
+                                actions.Add(new Action(UnitActionType.VINE, u.id, toVine.position));
 
-                        //Spot and gove nearest diamond
-                        Position target = findNearestDiamonds(gameMessage.map, u);
-                        if(target.x == 1000)
-                            target = getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize());
+                            //Spot and gove nearest diamond
+                            Position target = findNearestDiamonds(gameMessage.map, u);
+                            if (target.x == 1000)
+                                target = getRandomPosition(gameMessage.map.horizontalSize(), gameMessage.map.verticalSize());
 
-                        actions.Add(new Action(UnitActionType.MOVE, u.id, target));
+                            actions.Add(new Action(UnitActionType.MOVE, u.id, target));
+                        }
                     }
                 }
-            }
 
-            return new GameCommand(actions);
+                return new GameCommand(actions);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
         }
 
         private Unit canVineSomeone(Unit u, GameMessage gameMessage)
