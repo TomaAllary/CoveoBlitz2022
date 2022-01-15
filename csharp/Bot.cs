@@ -60,10 +60,14 @@ namespace Blitz2022
                         {
                             //seuil todo: a changer
                             Position dropPos = DropD(u, gameMessage);
-                            if (gameMessage.map.getDiamondById(u.diamondId).points > 30 && dropPos != null && closestEnnemyDistance(gameMessage, u.position) > 1)
+                            if (gameMessage.map.getDiamondById(u.diamondId).points > 30 && dropPos != null)
                             {
-                                if (closestEnnemyDistance(gameMessage, u.position) < 4 || isVinable(gameMessage, u.position, 'x') || isVinable(gameMessage, u.position, 'y'))
+                                if (closestEnnemyDistance(gameMessage, u.position) < 4 )
                                     actions.Add(new Action(UnitActionType.DROP, u.id, dropPos));
+                                else if (isVinable(gameMessage, u.position, 'x') || isVinable(gameMessage, u.position, 'y'))
+                                {
+                                    actions.Add(new Action(UnitActionType.MOVE, u.id, safestMove(u.position, gameMessage)));
+                                }
                             }
                             else
                             {
@@ -101,7 +105,7 @@ namespace Blitz2022
                                                 if (gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + forward)) != TileType.SPAWN && gameMessage.map.getTileTypeAt(new Position(u.position.x, u.position.y + forward)) != TileType.WALL)
                                                     actions.Add(new Action(UnitActionType.MOVE, u.id, new Position(u.position.x, u.position.y + forward)));
                                                 else
-                                                    DropD(u, gameMessage);
+                                                    actions.Add(new Action(UnitActionType.DROP, u.id, DropD(u, gameMessage)));
                                             }
                                                 
 
@@ -286,6 +290,136 @@ namespace Blitz2022
             }
 
             return null;
+        }
+
+        private Position safestMove(Position from, GameMessage gameMessage)
+        {
+            Position p1 = new Position(from.x, from.y + 1);
+            Position p2 = new Position(from.x, from.y - 1);
+            Position p3 = new Position(from.x + 1, from.y);
+            Position p4 = new Position(from.x - 1, from.y);
+            int p1SafeDist = 0;
+            int p2SafeDist = 0;
+            int p3SafeDist = 0;
+            int p4SafeDist = 0;
+            Position bestPos = p1;
+            int safestDist = 0;
+
+            bool p1CanVine = false;
+            bool p2CanVine = false;
+            bool p3CanVine = false;
+            bool p4CanVine = false;
+            bool bestIsSafeFromVine = false;
+            Position bestPosFromVine = p1;
+
+
+            if (gameMessage.map.doesTileExists(p1))
+            {
+                if (gameMessage.map.getTileTypeAt(p1) == TileType.EMPTY && getUnitOnTile(gameMessage, p1) == null)
+                {
+                    p1SafeDist = Distance(from, closestEnnemies(gameMessage, p1)[0].position);
+
+                    if (isVinable(gameMessage, p1, 'x') || isVinable(gameMessage, p1, 'y'))
+                    {
+                        p1CanVine = true;
+
+                    }
+                    else
+                    {
+                        bestIsSafeFromVine = true;
+                        if (p1SafeDist > safestDist)
+                        {
+                            bestPosFromVine = p1;
+                            safestDist = p1SafeDist;
+                        }
+                    }
+                }
+            }
+            if (gameMessage.map.doesTileExists(p2))
+            {
+                if (gameMessage.map.getTileTypeAt(p2) == TileType.EMPTY && getUnitOnTile(gameMessage, p2) == null)
+                {
+                    p2SafeDist = Distance(from, closestEnnemies(gameMessage, p1)[0].position);
+
+                    if (isVinable(gameMessage, p2, 'x') || isVinable(gameMessage, p2, 'y'))
+                    {
+                        p2CanVine = true;
+                    }
+                    else
+                    {
+                        bestIsSafeFromVine = true;
+                        if (p2SafeDist > safestDist)
+                        {
+                            bestPosFromVine = p2;
+                            safestDist = p2SafeDist;
+                        }
+                    }
+                    
+
+                }
+            }
+            if (gameMessage.map.doesTileExists(p3))
+            {
+                if (gameMessage.map.getTileTypeAt(p3) == TileType.EMPTY && getUnitOnTile(gameMessage, p3) == null)
+                {
+                    p3SafeDist = Distance(from, closestEnnemies(gameMessage, p1)[0].position);
+
+                    if (isVinable(gameMessage, p3, 'x') || isVinable(gameMessage, p3, 'y'))
+                    {
+                        p3CanVine = true;
+                    }
+                    else
+                    {
+                        bestIsSafeFromVine = true;
+                        if (p3SafeDist > safestDist)
+                        {
+                            bestPosFromVine = p3;
+                            safestDist = p3SafeDist;
+                        }
+                    }
+
+                }
+            }
+            if (gameMessage.map.doesTileExists(p4))
+            {
+                if (gameMessage.map.getTileTypeAt(p4) == TileType.EMPTY && getUnitOnTile(gameMessage, p4) == null)
+                {
+                    p4SafeDist = Distance(from, closestEnnemies(gameMessage, p1)[0].position);
+
+                    if (isVinable(gameMessage, p4, 'x') || isVinable(gameMessage, p4, 'y'))
+                    {
+                        p4CanVine = true;
+                    }
+                    else
+                    {
+                        bestIsSafeFromVine = true;
+                        if (p4SafeDist > safestDist)
+                        {
+                            bestPosFromVine = p4;
+                            safestDist = p4SafeDist;
+                        }
+                    }
+                }
+            }
+
+            if (bestIsSafeFromVine)
+            {
+                return bestPosFromVine;
+            }
+            else
+            {
+                if (p1CanVine)
+                    return p1;
+                if (p2CanVine)
+                    return p2;
+                if (p3CanVine)
+                    return p3;
+                else
+                    return p4;
+            }
+
+
+            
         }
 
         private Position nearestWalkablePos(Position target)
@@ -685,7 +819,7 @@ namespace Blitz2022
                     {
                         foreach (Unit u in t.units)
                         {
-                            if (u.hasSpawned && !(u.position.x == unitPosition.x && u.position.y == unitPosition.y))
+                            if (u.hasSpawned && !(u.position.x == unitPosition.x && u.position.y == unitPosition.y) && u.diamondId == null)
                             {
                                 if (u.position.x == unitPosition.x)
                                 {
@@ -710,7 +844,7 @@ namespace Blitz2022
                     {
                         foreach (Unit u in t.units)
                         {
-                            if (u.hasSpawned && !(u.position.x == unitPosition.x && u.position.y == unitPosition.y))
+                            if (u.hasSpawned && !(u.position.x == unitPosition.x && u.position.y == unitPosition.y) && u.diamondId == null)
                             {
                                 if (u.position.y == unitPosition.y)
                                 {
