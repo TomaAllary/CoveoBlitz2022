@@ -63,13 +63,14 @@ namespace Blitz2022
 
         private Position findNearestDiamonds(Map map, Unit unit) 
         {
-            Diamond nearest = map.diamonds[0];
+            Position nearest = new Position(1000, 1000);
             foreach(Diamond diamonds in map.diamonds)
             {
-                if (distance(diamonds.position, unit.position) < distance(nearest.position, unit.position))
-                    nearest = diamonds;
+                if (diamonds.ownerId == null && distance(diamonds.position, unit.position) < distance(nearest, unit.position))
+                    nearest = diamonds.position;
             }
-            return nearest.position;
+
+            return nearest;
         }
 
         private int distance(Position diamond, Position unit)
