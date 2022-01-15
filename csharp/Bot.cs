@@ -92,6 +92,14 @@ namespace Blitz2022
                             if (closestEnnemyDistance(gameMessage, u.position) == 1)
                             {
                                 List<Unit> attackableUnits = closestEnnemies(gameMessage, u.position);
+                                foreach(Unit au in attackableUnits)
+                                {
+                                    if (doWePlayBeforeThem(au.teamId, gameMessage))
+                                    {
+                                        actions.Add(new Action(UnitActionType.ATTACK, u.id, au.position));
+                                        break;
+                                    }                                      
+                                }
                                 
                             }
 
@@ -278,13 +286,17 @@ namespace Blitz2022
             return new Position(rand.Next(horizontalSize), rand.Next(verticalSize));
         }
 
-       /* private bool doWePlayBeforeThem (string otherTeam, GameMessage gm)
+       private bool doWePlayBeforeThem (string otherTeam, GameMessage gm)
         {
-            if (gm.teamPlayOrderings.getByValueKey(gm.teamId) < gm.teamPlayOrderings.getByValueKey(otherTeam))
+            int test = gm.tick;
+            Dictionary<int, string[]> dico = gm.teamPlayOrderings;
+            string[] teamOrders = dico[gm.tick];
+            if(Array.IndexOf(teamOrders, gm.teamId) < Array.IndexOf(teamOrders, otherTeam))
+            {
                 return true;
-            else
+            }
                 return false;
-        }*/
+        }
 
         //Returns an int with the distance between player and closest ennemies
         private int closestEnnemyDistance(GameMessage gm, Position position)
