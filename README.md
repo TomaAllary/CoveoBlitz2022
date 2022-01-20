@@ -25,7 +25,7 @@ The usage of any other language or external library must be authorized by Coveo 
 ## The 2022 Edition:
 
 See the Rules and Explanations PDF for specific informations about the 2022 competition and know the rules of this year's game.
-### We Are [Malicous Goats](www.maliciousgoats.com)!
+### We Are [Malicous Goats](https://maliciousgoats.github.io)!
 Our team is Malicious Goats.
 To see the finals of this year, unzip the Finals-Tournament.zip. You'll will be able to see the tournament bracket and our matches against competitors.
 
