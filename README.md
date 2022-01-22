@@ -1,5 +1,5 @@
  
-# Coveo Blitz 2022
+# Coveo Blitz 2022 - 3rd Place Winner
 ## What is Coveo Blitz
 - One of the oldest programming competitions in Quebec.
 - A Competition to demonstrate your technical abilities in developing smart algorithms to compete against other teams.
@@ -26,7 +26,7 @@ The usage of any other language or external library must be authorized by Coveo 
 
 See the Rules and Explanations PDF for specific informations about the 2022 competition and know the rules of this year's game.
 ### We Are [Malicous Goats](https://maliciousgoats.github.io)!
-Our team is Malicious Goats.
+Our team is Malicious Goats - We'we won the 3rd place this year.
 To see the finals of this year, unzip the Finals-Tournament.zip. You'll will be able to see the tournament bracket and our matches against competitors.
 
 The bot implementation can be found under the csharp folder.
